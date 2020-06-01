@@ -1,0 +1,104 @@
+﻿<UserControl x:Class="TestApp.Views.CurrencyWidget"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:ViewModel="clr-namespace:TestApp.ViewModel"
+             xmlns:infrastructure="clr-namespace:TestApp.Infrastructure"
+             x:Name="root"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800"
+             DataContext="{Binding CurrencyWidget, Source={StaticResource Locator}}">  
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition MinWidth="100"/>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="0"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30
+"/>
+            <RowDefinition Height="99*"/>
+            <RowDefinition Height="41*"/>
+        </Grid.RowDefinitions>
+        <ListView Grid.Row="1" Margin="0,0,1,5"
+                  ItemsSource="{Binding Valutes}" SelectedItem="{Binding CurrentValute}">           
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="Код" Width="50" DisplayMemberBinding="{Binding CharCode}">
+                    </GridViewColumn>
+                    <GridViewColumn Header="Валюта" Width="200" DisplayMemberBinding="{Binding Name}">
+                    </GridViewColumn>
+                    <GridViewColumn Header="Единиц" Width="50" DisplayMemberBinding="{Binding Nominal}">
+                    </GridViewColumn>
+                    <GridViewColumn Header="Курс" Width="250" DisplayMemberBinding="{Binding CurrentValue}">
+                    </GridViewColumn>
+                </GridView>
+            </ListView.View>
+        </ListView>
+        <Border BorderBrush="Black" BorderThickness="1" Margin="0,0,1,10" Grid.Row="2">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="2*"/>
+                    <RowDefinition Height="35*"/>
+                    <RowDefinition Height="27*"/>
+                    <RowDefinition Height="31*"/>
+                </Grid.RowDefinitions>
+                <TextBlock Name="CurrentValute" TextWrapping="Wrap" Text="{Binding CurrentValute.Name}" Margin="10,8,10,3" Grid.Row="1"/>
+                <TextBlock Name="ValuteRate" Margin="1" Grid.Row="2" Text ="{Binding ValuteToUsd}"/>
+                <TextBlock Margin="1,5,1,0" Grid.Row="3" TextWrapping="Wrap" Text="{Binding ValuteToRub}"/>
+
+            </Grid>
+        </Border>
+        <TextBlock Grid.Column="1" Margin="10,4,181,10" TextWrapping="Wrap" Text="Конвертировать" />      
+        <ItemsControl Grid.Column="1" Grid.Row="1" Margin="0" ItemsSource="{Binding Conventions}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Vertical"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Grid Margin="8,4,8,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="50"/>
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <ComboBox Grid.Column="0" ItemsSource="{Binding ElementName=root, Path=DataContext.AvailableCurrencies}" 
+                                  SelectedItem="{Binding ExchangeConvention, UpdateSourceTrigger=PropertyChanged}"  
+                                  infrastructure:ComboBoxSelectionChangedEventProvider.Command="{Binding ElementName=root, Path=DataContext.RecalculateCommand}"
+                                 infrastructure:ComboBoxSelectionChangedEventProvider.CommandParameter="{Binding}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Code}"></TextBlock>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <TextBox Grid.Column="1" Width="Auto" HorizontalAlignment="Stretch" 
+                                 Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                 Margin="8,0,0,0"
+                                 infrastructure:TextChangedEventProvider.Command="{Binding ElementName=root, Path=DataContext.RecalculateCommand}"
+                                 infrastructure:TextChangedEventProvider.CommandParameter="{Binding}">
+
+                        </TextBox>
+                    </Grid>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <Grid Height="26" Margin="0,2,0,2" VerticalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200"/>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="73"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="{Binding SelectedDateTime, StringFormat=Курсы валют на \{0:MM/dd/yyyy\}}" Margin="0" VerticalAlignment="Center"/>
+            <Button Content="Обновить" Command="{Binding RefreshData}" Grid.Column="3" Margin="0" VerticalAlignment="Center"/>
+            <TextBlock Grid.Column="1" HorizontalAlignment="Stretch" TextWrapping="Wrap" Text="Поиск" VerticalAlignment="Center"/>
+            <TextBox Grid.Column="2" Margin="0,0,8,0" x:Name="search" VerticalAlignment="Center"
+                     infrastructure:TextChangedEventProvider.Command="{Binding SearchCurrencyCommand}"
+                     infrastructure:TextChangedEventProvider.CommandParameter="{Binding ElementName=search, Path=Text}"/>
+        </Grid>
+    </Grid>
+</UserControl>
